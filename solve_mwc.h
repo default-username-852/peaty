@@ -10,3 +10,4 @@ struct Result
 };
 
 auto mwc(SparseGraph* g, const Params* params) -> Result;
+bool check_vertex_cover(const SparseGraph & g, const vector<int> & vc);

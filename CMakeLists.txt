@@ -20,7 +20,7 @@ set(sources
   sparse_graph.cpp
   util.cpp)
 
-add_executable(solve_vc ${sources})
+add_executable(solve_vc ${sources} main.cpp)
 
 set_target_properties(solve_vc
   PROPERTIES
