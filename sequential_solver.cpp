@@ -155,7 +155,7 @@ public:
                     incumbent.push_vtx(i, 1);
                 }
             }
-            std::cout << "c incumbent from local search " << incumbent.vv.size() << std::endl;
+            //std::cout << "c incumbent from local search " << incumbent.vv.size() << std::endl;
         }
     }
 
@@ -239,7 +239,7 @@ class MWC {
             for (unsigned i=0; i<incumbent.vv.size(); i++)
                 incumbent.vv[i] = vertex_numbers_in_original_graph[incumbent.vv[i]];
 
-            std::cout << "c TMP " << incumbent.total_wt << std::endl;
+            //std::cout << "c TMP " << incumbent.total_wt << std::endl;
         }
     }
 

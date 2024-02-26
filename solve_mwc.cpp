@@ -17,6 +17,7 @@
 #include "util.h"
 #include "sequential_solver.h"
 #include "params.h"
+#include "solve_mwc.h"
 
 using std::atomic;
 using std::condition_variable;
@@ -127,12 +128,8 @@ bool check_vertex_cover(const SparseGraph & g, const vector<int> & vc) {
     return true;
 }
 
-struct Result
-{
-    VtxList vertex_cover;
-    long search_node_count;
-    Result(const SparseGraph & g) : vertex_cover(g.n), search_node_count(0) {}
-};
+Result::Result(const SparseGraph & g) : vertex_cover(g.n), search_node_count(0) {}
+Result::~Result() {}
 
 struct Reduction
 {
@@ -559,26 +556,26 @@ auto find_vertex_cover_of_subgraph(const SparseGraph & g, vector<int> component,
     return vertex_cover;
 }
 
-auto mwc(SparseGraph g, const Params & params) -> Result
+auto mwc(SparseGraph* g, const Params* params) -> Result
 {
-    vector<bool> deleted = g.vertex_has_loop;
-    vector<bool> in_cover = g.vertex_has_loop;
-    g.remove_edges_incident_to_loopy_vertices();
+    vector<bool> deleted = g->vertex_has_loop;
+    vector<bool> in_cover = g->vertex_has_loop;
+    g->remove_edges_incident_to_loopy_vertices();
 
     vector<std::unique_ptr<Reduction>> reductions;
 
     while (true) {
-        bool a = isolated_vertex_removal(g, in_cover, deleted);
-        bool b = do_domination_reductions(g, in_cover, deleted, reductions);
-        bool c = vertex_folding(g, deleted, reductions);
-        bool d = do_funnel_reductions(g, in_cover, deleted, reductions);
+        bool a = isolated_vertex_removal(*g, in_cover, deleted);
+        bool b = do_domination_reductions(*g, in_cover, deleted, reductions);
+        bool c = vertex_folding(*g, deleted, reductions);
+        bool d = do_funnel_reductions(*g, in_cover, deleted, reductions);
         bool e = false;  //do_bow_tie_reductions(g, in_cover, deleted, reductions);
         if (!a && !b && !c && !d && !e)
             break;
     };
-    check_adj_list_integrity(g);
+    check_adj_list_integrity(*g);
 
-    vector<vector<int>> components = make_list_of_components(g);
+    vector<vector<int>> components = make_list_of_components(*g);
 
 //    for (auto & component : components) {
 //        std::cout << "A_COMPONENT";
@@ -589,10 +586,10 @@ auto mwc(SparseGraph g, const Params & params) -> Result
 //    }
 //    std::cout << "END_COMPONENTS" << std::endl;
 
-    Result result(g);
+    Result result(*g);
     for (auto & component : components) {
-        std::cout << "c COMPONENT " << component.size() << std::endl;
-        auto vertex_cover_of_subgraph = find_vertex_cover_of_subgraph(g, component, params);
+        //std::cout << "c COMPONENT " << component.size() << std::endl;
+        auto vertex_cover_of_subgraph = find_vertex_cover_of_subgraph(*g, component, *params);
         for (int v : vertex_cover_of_subgraph) {
             in_cover[v] = true;
         }
@@ -603,7 +600,7 @@ auto mwc(SparseGraph g, const Params & params) -> Result
         reductions.pop_back();
     }
 
-    for (unsigned v=0; v<g.n; v++) {
+    for (unsigned v=0; v<g->n; v++) {
         if (in_cover[v]) {
             result.vertex_cover.push_vtx(v, 1);
         }
@@ -625,7 +622,7 @@ int main(int argc, char** argv) {
     Params params {arguments.colouring_variant, arguments.max_sat_level, arguments.algorithm_num,
             arguments.num_threads, arguments.quiet, arguments.unweighted_sort};
 
-    Result result = mwc(g, params);
+    Result result = mwc(&g, &params);
 
     // sort vertices in clique by index
     std::sort(result.vertex_cover.vv.begin(), result.vertex_cover.vv.end());

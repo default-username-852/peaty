@@ -45,6 +45,14 @@ struct VtxList {
     {
         vv.reserve(capacity);
     }
+    auto num_vtx() -> size_t
+    {
+        return vv.size();
+    }
+    auto vtxs() -> int*
+    {
+        return &vv[0];
+    }
     auto clear() -> void
     {
         total_wt = 0;

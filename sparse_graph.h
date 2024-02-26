@@ -43,6 +43,7 @@ struct SparseGraph
     SparseGraph(int n) : n(n), adjlist(n), weight(n, 1), vertex_has_loop(n)
     {
     }
+    ~SparseGraph() {}
 
     auto add_loop(int v) -> void
     {
