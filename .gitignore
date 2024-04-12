@@ -3,3 +3,8 @@ tmp*
 build/
 pace-challenge*/
 *.bak
+
+
+# Added by cargo
+
+/target
